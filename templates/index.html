@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <meta property="og:title" content="Buy Martian Land!" />
+        <meta property="og:description"
+            content="A LearningX mini-project of 'Buy Martian Land!', RimuEirnarn's implementation" />
+        <meta property="og:image" content="{{ url_for('static', filename='ogimage.jpg') }}" />
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+            </script>
+
+        <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+
+        <title>Mars Land Purchase Site</title>
+
+        <style>
+            * {
+                font-family: 'Gowun Batang', serif;
+                color: white;
+            }
+
+            body {
+                background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://cdn.aitimes.com/news/photo/202010/132592_129694_3139.jpg');
+                background-position: center;
+                background-size: cover;
+            }
+
+            h1 {
+                font-weight: bold;
+            }
+
+            .order {
+                width: 500px;
+                margin: 60px auto 0px auto;
+                padding-bottom: 60px;
+            }
+
+            .mybtn {
+                width: 100%;
+            }
+
+            .order>table {
+                margin: 40px 0;
+                font-size: 18px;
+            }
+
+            option {
+                color: black;
+            }
+        </style>
+        <script>
+            $(document).ready(function () {
+                show_order()
+                unshow()
+            });
+            var sanitizeHTML = function (str) {
+                return str.replace(/[^\w. ]/gi, function (c) {
+                    return '&#' + c.charCodeAt(0) + ';';
+                });
+            };
+
+            function form_order() {
+                let name = $('#name').val()
+                let address = $('#address').val()
+                let size = $('#size > option:selected').val();
+                let err = 0;
+                if (size == "-- Select acreage --") {
+                    show_error("#invalid-select", "Select a range!")
+                    err++
+                }
+                if (name == "") {
+                    show_error("#invalid-name", "Name must not empty!")
+                    err++
+                }
+                if (address == "") {
+                    show_error("#invalid-address", "Address must not empty!")
+                    err++
+                }
+                if (err != 0) throw new Error(`Failed post request! ${err} Errors in a row!`)
+                return { name, address, size }
+            }
+
+            function unshow() {
+                $("#invalid-name").hide()
+                $("#invalid-address").hide()
+                $("#invalid-select").hide()
+            }
+
+            function show_error(selector, text) {
+                let obj = $(selector)
+                obj.text(text)
+                obj.show()
+            }
+
+            function push(name, address, size) {
+                let sanitized_name = sanitizeHTML(name)
+                let sanitized_address = sanitizeHTML(address)
+                let sanitized_size = sanitizeHTML(size)
+                let main = $("#table").append(`
+<tr>
+    <td>${sanitized_name}</td>
+    <td>${sanitized_address}</td>
+    <td>${sanitized_size}</td>
+</tr>`)
+            }
+
+            function push_ret() {
+                data = form_order()
+                push(data.name, data.address, data.size)
+                return data
+            }
+
+            function show_order() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/mars',
+                    data: {},
+                    success: function (response) {
+                        console.log("Fetched.")
+                        for (const data of response['request']) {
+                            push(data.name, data.address, data.size)
+                        }
+                    }
+                });
+            }
+
+            function save_order() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/mars',
+                    data: push_ret(),
+                    success: function (response) {
+                        console.log(response['message'])
+                        unshow()
+                    }
+                });
+            }
+        </script>
+    </head>
+
+    <body>
+        <div class="mask"></div>
+        <div class="order">
+            <h1>Buy Martian Land!</h1>
+            <h3>Price: $1.00 / acre</h3>
+            <p>
+                Did you know you could buy Martian land?<br /> This chance won't come again!
+            </p>
+            <div class="order-info">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Name</span>
+                    <input id="name" type="text" class="form-control">
+                </div>
+                <p class="text-danger" id="invalid-name"></p>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Address</span>
+                    <input id="address" type="text" class="form-control">
+                </div>
+                <p class="text-danger" id="invalid-address"></p>
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="size">Acres</label>
+                    <select class="form-select" id="size">
+                        <option selected>-- Select acreage --</option>
+                        <option value="10">10 acres</option>
+                        <option value="20">20 acres</option>
+                        <option value="30">30 acres</option>
+                        <option value="40">40 acres</option>
+                        <option value="50">50 acres</option>
+                    </select>
+                </div>
+                <p class="text-danger" id="invalid-select"></p>
+                <button onclick="save_order()" type="button" class="btn btn-warning mybtn">Create order</button>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Address</th>
+                        <th scope="col">Acres</th>
+                    </tr>
+                </thead>
+                <tbody id='table'>
+                    <tr>
+                        <td>Jim</td>
+                        <td>100 Downing St.</td>
+                        <td>20 acres</td>
+                    </tr>
+                    <tr>
+                        <td>Bob</td>
+                        <td>856 Peterson Ave.</td>
+                        <td>10 acres</td>
+                    </tr>
+                    <tr>
+                        <td>Steve</td>
+                        <td>212 Baker St.</td>
+                        <td>30 acres</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+
+</html>
