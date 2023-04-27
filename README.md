@@ -1,3 +1,3 @@
-# 
+# Mars
 
-RimuEirnarn's implementation of 
+RimuEirnarn's implementation of Mars
