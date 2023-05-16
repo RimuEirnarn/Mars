@@ -77,6 +77,10 @@
                     show_error("#invalid-select", "Select a range!")
                     err++
                 }
+                if ((name.length >= 512) || address.length >= 512) {
+                    show_error("#invalid-name", "Either name or address length must be more than 512 characters")
+                    err++
+                }
                 if (name == "") {
                     show_error("#invalid-name", "Name must not empty!")
                     err++

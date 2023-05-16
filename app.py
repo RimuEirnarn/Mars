@@ -14,6 +14,10 @@ mars = database.mars
 
 app = Flask(__name__)
 
+def validate(n, a, s):
+    if len(n) >= 512 or len(a) >= 512 or len(s) >= 512:
+        return 400, "Either name, address, or size exceed the limit"
+    return None, None
 
 @app.route('/')
 def home():
@@ -25,6 +29,9 @@ def web_mars_post():
     name = request.form['name']
     address = request.form['address']
     size = request.form['size']
+    c, r = validate(name, address, size)
+    if c:
+        return r, c
     mars.insert_one({
         'name': name,
         'address': address,
