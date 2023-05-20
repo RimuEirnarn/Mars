@@ -32,10 +32,12 @@ def web_mars_post():
     c, r = validate(name, address, size)
     if c:
         return r, c
+    if not size.isnumeric():
+        return jsonify({"status": "error", "message": "Size not an integer"})
     mars.insert_one({
         'name': name,
         'address': address,
-        'size': size
+        'size': int(size)
     })
     return jsonify({'status': 'success', 'message': "Purchase success!"})
 
