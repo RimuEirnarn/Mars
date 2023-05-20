@@ -33,7 +33,7 @@ def web_mars_post():
     if c:
         return r, c
     if not size.isnumeric():
-        return jsonify({"status": "error", "message": "Size not an integer"})
+        return jsonify({"status": "error", "message": "Size not an integer"}), 400
     mars.insert_one({
         'name': name,
         'address': address,
